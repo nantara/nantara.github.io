@@ -97,12 +97,12 @@
       fetch(`${workerBase}/scenes?token=${token}`)
         .then(res => res.json())
         .then(data => {
-          if (data.body && data.body.sceneList) {
-            document.getElementById("result").innerHTML =
-              renderTable(data.body.sceneList, "scene");
-          } else {
-            showError(JSON.stringify(data));
-          }
+if (Array.isArray(data.body)) {
+    document.getElementById("result").innerHTML =
+      renderTable(data.body, "scene");
+} else {
+    showError(JSON.stringify(data));
+}
         })
         .catch(err => showError(err.toString()));
     });
