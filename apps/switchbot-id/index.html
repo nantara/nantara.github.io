@@ -47,11 +47,24 @@
       border: 1px solid var(--border);
     }
 
+    .token-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .token-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+
     input {
-      width: 100%;
+      flex: 1;
       padding: 12px;
       font-size: 16px;
-      margin-bottom: 10px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--bg);
@@ -61,8 +74,6 @@
     button {
       padding: 12px;
       font-size: 16px;
-      margin: 5px 0;
-      width: 100%;
       border: none;
       border-radius: 8px;
       background: var(--button-bg);
@@ -109,11 +120,6 @@
     .table-wrapper {
       overflow-x: auto;
     }
-
-    .dark-toggle {
-      margin-top: 10px;
-      background: #444;
-    }
   </style>
 </head>
 <body>
@@ -122,19 +128,18 @@
 
   <div class="card">
     <p class="warning">
-      ブラウザを閉じればトークンは破棄されます。<br>
-      それでも不安な方は使用しないでください。
+      ブラウザを閉じればトークンは破棄されます。 それでも不安な方は使用しないでください。
     </p>
 
     <label>SwitchBot Token:</label>
-    <input type="text" id="tokenInput" placeholder="Token を入力">
 
-    <button id="pasteToken">Token を貼り付け</button>
+    <div class="token-row">
+      <input type="text" id="tokenInput" placeholder="Token を入力">
+      <button id="pasteToken">クリップボードから貼り付け</button>
+    </div>
 
     <button id="getDevices">デバイスID取得</button>
     <button id="getScenes">シーンID取得</button>
-
-    <button class="dark-toggle" id="toggleDark">ダークモード切替</button>
   </div>
 
   <div class="card">
@@ -233,16 +238,6 @@
           } else showError(JSON.stringify(data));
         })
         .catch(err => showError(err));
-    });
-
-    // ダークモード切替
-    document.getElementById("toggleDark").addEventListener("click", () => {
-      document.documentElement.classList.toggle("manual-dark");
-      if (document.documentElement.classList.contains("manual-dark")) {
-        document.documentElement.style.filter = "invert(1) hue-rotate(180deg)";
-      } else {
-        document.documentElement.style.filter = "";
-      }
     });
   </script>
 
