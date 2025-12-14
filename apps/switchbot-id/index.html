@@ -2,19 +2,15 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>SwitchBot Device & Scene ID viewer</title>
+  <title>SwitchBot ID Viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, sans-serif;
       margin: 0;
       padding: 16px;
       background: #f5f5f5;
       color: #333;
-    }
-    h1 {
-      font-size: 20px;
-      margin-bottom: 8px;
     }
     .container {
       max-width: 900px;
@@ -23,6 +19,10 @@
       padding: 16px;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 8px;
     }
     label {
       font-weight: 600;
@@ -38,24 +38,13 @@
       font-size: 14px;
       box-sizing: border-box;
     }
-    .hint {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 8px;
-    }
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-      margin-bottom: 12px;
-    }
     button {
       padding: 8px 14px;
       border-radius: 4px;
       border: none;
       font-size: 13px;
       cursor: pointer;
+      margin-right: 6px;
     }
     .btn-primary {
       background: #2da44e;
@@ -65,21 +54,14 @@
       background: #e5e5e5;
       color: #333;
     }
-    .btn-primary:disabled {
-      background: #9ac7a4;
-      cursor: default;
-    }
     .status {
+      margin-top: 10px;
       font-size: 13px;
-      margin-top: 8px;
       min-height: 18px;
     }
-    .status.error {
-      color: #b00020;
-    }
-    .status.success {
-      color: #007700;
-    }
+    .status.error { color: #b00020; }
+    .status.success { color: #007700; }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -89,12 +71,10 @@
     th, td {
       border: 1px solid #ddd;
       padding: 6px 8px;
-      vertical-align: top;
     }
     th {
       background: #fafafa;
       text-align: left;
-      white-space: nowrap;
     }
     .copy-btn {
       font-size: 11px;
@@ -124,41 +104,28 @@
 </head>
 <body>
   <div class="container">
-    <h1>SwitchBot Device & Scene ID viewer</h1>
-    <div class="hint">
-      SwitchBot API tokenをブラウザ内だけで使ってデバイスIDとシーンIDを表示します。<br>
-      トークンはサーバーには送信されません。
-    </div>
+    <h1>SwitchBot Device & Scene ID Viewer</h1>
 
-    <label for="token">SwitchBot API token</label>
+    <label for="token">SwitchBot API Token</label>
     <input id="token" type="text" placeholder="例: 1234567890abcdef...">
-    <div class="hint">
-      SwitchBotアプリ → プロフィール → 設定 → 「API token」から取得してください。
-    </div>
 
-    <div class="row">
+    <div style="margin-top: 12px;">
       <button id="btn-devices" class="btn-primary">デバイス一覧を取得</button>
       <button id="btn-scenes" class="btn-secondary">シーン一覧を取得</button>
     </div>
 
     <div id="status" class="status"></div>
 
-    <div id="devices-section">
-      <div class="section-title">デバイス一覧</div>
-      <div id="devices-container"></div>
-    </div>
+    <div class="section-title">デバイス一覧</div>
+    <div id="devices-container"></div>
 
-    <div id="scenes-section">
-      <div class="section-title">シーン一覧</div>
-      <div id="scenes-container"></div>
-    </div>
+    <div class="section-title">シーン一覧</div>
+    <div id="scenes-container"></div>
 
     <div class="section-title">APIレスポンス（デバッグ用）</div>
     <pre id="raw-response">まだ取得されていません。</pre>
 
-    <div class="footer">
-      Created by Yamaji Nantara
-    </div>
+    <div class="footer">Created by Yamaji Nantara</div>
   </div>
 
   <script src="script.js"></script>
