@@ -2,132 +2,110 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>SwitchBot ID Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SwitchBot Device & Scene ID Viewer</title>
   <style>
-    body {
-      font-family: system-ui, sans-serif;
-      margin: 0;
-      padding: 16px;
-      background: #f5f5f5;
-      color: #333;
-    }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-    }
-    h1 {
-      font-size: 20px;
-      margin-bottom: 8px;
-    }
-    label {
-      font-weight: 600;
-      display: block;
-      margin-top: 12px;
-      margin-bottom: 4px;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    button {
-      padding: 8px 14px;
-      border-radius: 4px;
-      border: none;
-      font-size: 13px;
-      cursor: pointer;
-      margin-right: 6px;
-    }
-    .btn-primary {
-      background: #2da44e;
-      color: #fff;
-    }
-    .btn-secondary {
-      background: #e5e5e5;
-      color: #333;
-    }
-    .status {
-      margin-top: 10px;
-      font-size: 13px;
-      min-height: 18px;
-    }
-    .status.error { color: #b00020; }
-    .status.success { color: #007700; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-      font-size: 13px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 6px 8px;
-    }
-    th {
-      background: #fafafa;
-      text-align: left;
-    }
-    .copy-btn {
-      font-size: 11px;
-      padding: 4px 8px;
-      margin-left: 4px;
-    }
-    .section-title {
-      margin-top: 20px;
-      font-size: 16px;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 4px;
-    }
-    pre {
-      background: #f8f8f8;
-      padding: 8px;
-      border-radius: 4px;
-      overflow-x: auto;
-      font-size: 12px;
-    }
-    .footer {
-      margin-top: 24px;
-      font-size: 11px;
-      color: #777;
-      text-align: right;
-    }
+    body { font-family: sans-serif; padding: 20px; }
+    input { width: 300px; padding: 5px; }
+    button { margin: 5px; padding: 8px 12px; }
+    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f0f0f0; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>SwitchBot Device & Scene ID Viewer</h1>
+  <h1>SwitchBot Device & Scene ID Viewer</h1>
 
-    <label for="token">SwitchBot API Token</label>
-    <input id="token" type="text" placeholder="例: 1234567890abcdef...">
+  <label>SwitchBot Token:</label><br>
+  <input type="text" id="tokenInput" placeholder="Token を入力"><br><br>
 
-    <div style="margin-top: 12px;">
-      <button id="btn-devices" class="btn-primary">デバイス一覧を取得</button>
-      <button id="btn-scenes" class="btn-secondary">シーン一覧を取得</button>
-    </div>
+  <button id="getDevices">デバイスID取得</button>
+  <button id="getScenes">シーンID取得</button>
 
-    <div id="status" class="status"></div>
+  <h2>結果</h2>
+  <div id="result"></div>
 
-    <div class="section-title">デバイス一覧</div>
-    <div id="devices-container"></div>
+  <script>
+    const workerBase = "https://switchbot-proxy.nantara.workers.dev";
 
-    <div class="section-title">シーン一覧</div>
-    <div id="scenes-container"></div>
+    function renderTable(items, type) {
+      if (!items || items.length === 0) {
+        return "<p>データがありません。</p>";
+      }
 
-    <div class="section-title">APIレスポンス（デバッグ用）</div>
-    <pre id="raw-response">まだ取得されていません。</pre>
+      let html = "<table><tr>";
 
-    <div class="footer">Created by Yamaji Nantara</div>
-  </div>
+      if (type === "device") {
+        html += "<th>デバイス名</th><th>デバイスID</th><th>タイプ</th>";
+        html += "</tr>";
 
-  <script src="script.js"></script>
+        items.forEach(d => {
+          html += `<tr>
+            <td>${d.deviceName}</td>
+            <td>${d.deviceId}</td>
+            <td>${d.deviceType}</td>
+          </tr>`;
+        });
+
+      } else if (type === "scene") {
+        html += "<th>シーン名</th><th>シーンID</th>";
+        html += "</tr>";
+
+        items.forEach(s => {
+          html += `<tr>
+            <td>${s.sceneName}</td>
+            <td>${s.sceneId}</td>
+          </tr>`;
+        });
+      }
+
+      html += "</table>";
+      return html;
+    }
+
+    function showError(err) {
+      document.getElementById("result").innerHTML =
+        `<p style="color:red;">エラー: ${err}</p>`;
+    }
+
+    document.getElementById("getDevices").addEventListener("click", () => {
+      const token = document.getElementById("tokenInput").value;
+      if (!token) {
+        alert("Token を入力してください");
+        return;
+      }
+
+      fetch(`${workerBase}/devices?token=${token}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.body && data.body.deviceList) {
+            document.getElementById("result").innerHTML =
+              renderTable(data.body.deviceList, "device");
+          } else {
+            showError(JSON.stringify(data));
+          }
+        })
+        .catch(err => showError(err.toString()));
+    });
+
+    document.getElementById("getScenes").addEventListener("click", () => {
+      const token = document.getElementById("tokenInput").value;
+      if (!token) {
+        alert("Token を入力してください");
+        return;
+      }
+
+      fetch(`${workerBase}/scenes?token=${token}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.body && data.body.sceneList) {
+            document.getElementById("result").innerHTML =
+              renderTable(data.body.sceneList, "scene");
+          } else {
+            showError(JSON.stringify(data));
+          }
+        })
+        .catch(err => showError(err.toString()));
+    });
+  </script>
 </body>
 </html>
