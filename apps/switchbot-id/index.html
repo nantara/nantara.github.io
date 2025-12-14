@@ -2,21 +2,67 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SwitchBot Device & Scene ID Viewer</title>
+
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    input { width: 300px; padding: 5px; }
-    button { margin: 5px; padding: 8px 12px; }
-    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    body { 
+      font-family: sans-serif; 
+      padding: 20px; 
+      max-width: 800px; 
+      margin: auto;
+    }
+    input { 
+      width: 100%; 
+      padding: 10px; 
+      font-size: 16px; 
+      margin-bottom: 10px;
+    }
+    button { 
+      padding: 10px 15px; 
+      font-size: 16px; 
+      margin: 5px 0; 
+      width: 100%;
+    }
+    table { 
+      border-collapse: collapse; 
+      margin-top: 20px; 
+      width: 100%; 
+      font-size: 14px;
+    }
+    th, td { 
+      border: 1px solid #ccc; 
+      padding: 8px; 
+      text-align: left; 
+    }
     th { background: #f0f0f0; }
+    .copy-btn {
+      padding: 5px 8px;
+      font-size: 12px;
+      margin-left: 5px;
+    }
+    .warning {
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+    }
   </style>
 </head>
 <body>
+
   <h1>SwitchBot Device & Scene ID Viewer</h1>
 
-  <label>SwitchBot Token:</label><br>
-  <input type="text" id="tokenInput" placeholder="Token を入力"><br><br>
+  <p class="warning">
+    ブラウザを閉じればトークンは破棄されます。<br>
+    それでも不安な方は使用しないでください。
+  </p>
+
+  <label>SwitchBot Token:</label>
+  <input type="text" id="tokenInput" placeholder="Token を入力">
 
   <button id="getDevices">デバイスID取得</button>
   <button id="getScenes">シーンID取得</button>
@@ -25,14 +71,20 @@
   <div id="result"></div>
 
   <script>
-    const workerBase = "https://switchbot-proxy.g-sato-yaji.workers.dev";
+    const workerBase = "https://switchbot-proxy.g-sato-yaji.workers.dev";  // ←ここだけあなたのURLに変更
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("コピーしました: " + text);
+      });
+    }
 
     function renderTable(items, type) {
       if (!items || items.length === 0) {
         return "<p>データがありません。</p>";
       }
 
-      let html = "<table><tr>";
+      let html = '<div class="table-wrapper"><table><tr>';
 
       if (type === "device") {
         html += "<th>デバイス名</th><th>デバイスID</th><th>タイプ</th>";
@@ -41,7 +93,9 @@
         items.forEach(d => {
           html += `<tr>
             <td>${d.deviceName}</td>
-            <td>${d.deviceId}</td>
+            <td>${d.deviceId}
+              <button class="copy-btn" onclick="copyText('${d.deviceId}')">コピー</button>
+            </td>
             <td>${d.deviceType}</td>
           </tr>`;
         });
@@ -53,12 +107,14 @@
         items.forEach(s => {
           html += `<tr>
             <td>${s.sceneName}</td>
-            <td>${s.sceneId}</td>
+            <td>${s.sceneId}
+              <button class="copy-btn" onclick="copyText('${s.sceneId}')">コピー</button>
+            </td>
           </tr>`;
         });
       }
 
-      html += "</table>";
+      html += "</table></div>";
       return html;
     }
 
@@ -97,15 +153,16 @@
       fetch(`${workerBase}/scenes?token=${token}`)
         .then(res => res.json())
         .then(data => {
-if (Array.isArray(data.body)) {
-    document.getElementById("result").innerHTML =
-      renderTable(data.body, "scene");
-} else {
-    showError(JSON.stringify(data));
-}
+          if (Array.isArray(data.body)) {
+            document.getElementById("result").innerHTML =
+              renderTable(data.body, "scene");
+          } else {
+            showError(JSON.stringify(data));
+          }
         })
         .catch(err => showError(err.toString()));
     });
   </script>
+
 </body>
 </html>
